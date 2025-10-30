@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Investor | Famili Water</title>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#066b77">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/icon-192.png">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #0a0f24 0%, #020409 100%);
+      color: #e0faff;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 230px;
+      background: rgba(10, 15, 35, 0.9);
+      border-right: 1px solid rgba(0, 255, 255, 0.2);
+      box-shadow: 2px 0 15px rgba(0, 255, 255, 0.1);
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      transform: translateX(0);
+      transition: transform 0.4s ease;
+      z-index: 100;
+    }
+    .sidebar.hidden { transform: translateX(-100%); }
+
+    .sidebar-logo {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .sidebar-logo img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 20px #00ffff55;
+      border: 2px solid rgba(0,255,255,0.4);
+      transition: 0.3s;
+    }
+    .sidebar-logo img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px #00ffffaa;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #00eaff;
+      text-align: center;
+      margin-bottom: 35px;
+      text-shadow: 0 0 10px #00ffff90;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 15px;
+      margin: 6px 0;
+      color: #bcefff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background: linear-gradient(90deg, #00bcd4, #673ab7);
+      color: #fff;
+      box-shadow: 0 0 10px #00ffff60;
+    }
+
+    .logout {
+      background: rgba(255, 80, 80, 0.1);
+      color: #ff8080;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .logout:hover { background: rgba(255, 80, 80, 0.2); }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(2px);
+      z-index: 50;
+      display: none;
+    }
+    .overlay.show { display: block; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 30px;
+      margin-left: 230px;
+      transition: margin-left 0.4s ease;
+      width: 100%;
+    }
+    .sidebar.hidden ~ .main { margin-left: 0; }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 234, 255, 0.1);
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #00eaff;
+      box-shadow: 0 0 10px #00ffff50;
+      backdrop-filter: blur(10px);
+    }
+    .toggle-btn {
+      margin-right: 15px;
+      background: rgba(0,234,255,0.2);
+      border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle-btn:hover { background: rgba(0,234,255,0.35); }
+    .navbar-title { flex: 1; text-align: center; }
+
+    /* Profile Header */
+    .profile-header { text-align:center; margin-bottom:30px; }
+    .profile-header h1 {
+      font-size:34px;
+      color:#00ff90;
+      text-shadow:0 0 15px #00ff90aa;
+      margin-bottom:10px;
+    }
+
+    /* Info List */
+    .info-list {
+      background: rgba(15,20,40,0.8);
+      border:1px solid rgba(0,255,255,0.15);
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:20px;
+      box-shadow:0 0 15px rgba(0,255,255,0.1);
+      backdrop-filter:blur(10px);
+      opacity:0;
+      transform: translateY(40px);
+      transition: 0.6s ease-out;
+    }
+    .info-list.show { opacity:1; transform:translateY(0); }
+
+    .info-list div { margin-bottom:12px; font-size:16px; }
+    .info-list div span { font-weight:500; color:#00eaff; }
+
+    /* Profile Card */
+    .profile-card {
+      background: rgba(0,50,0,0.6);
+      border: 1px solid #00ff90;
+      border-radius:14px;
+      padding:20px;
+      margin:10px 0 30px;
+      box-shadow:0 0 15px #00ff90aa;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      opacity:0;
+      transform: translateY(40px);
+      transition:0.6s ease-out;
+    }
+    .profile-card.show { opacity:1; transform:translateY(0); }
+
+    /* Monthly Returns */
+    .monthly-returns {
+      background: rgba(15,20,40,0.8);
+      border:1px solid rgba(0,255,255,0.15);
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 0 15px rgba(0,255,255,0.1);
+      backdrop-filter:blur(10px);
+      opacity:0;
+      transform: translateY(40px);
+      transition:0.6s ease-out;
+    }
+    .monthly-returns.show { opacity:1; transform:translateY(0); }
+
+    .monthly-returns h2 {
+      color:#00eaff;
+      text-align:center;
+      margin-bottom:15px;
+      text-shadow:0 0 10px #00ffff70;
+    }
+    .month-item {
+      display:flex;
+      justify-content:space-between;
+      padding:8px 12px;
+      border-bottom:1px solid rgba(0,255,255,0.1);
+      font-size:15px;
+    }
+    .month-item span:first-child { color:#9cf; }
+
+    .footer { text-align:center; font-size:12px; color:#6ee7ff; opacity:0.6; margin-top:30px; }
+
+    @media(max-width:768px){
+      .main{margin-left:0; padding:20px;}
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.show{transform:translateX(0);}
+      .navbar-title{text-align:left;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-logo">
+        <img src="https://i.ibb.co/JFsMs41R/Logo-FW.png" alt="Logo Famili Water">
+      </div>
+      <div class="logo">Famili Water</div>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="profil.html" class="active">👤 Portofolio</a>
+      <a href="penjualan.html">📊 Data Penjualan</a>
+      <a href="grafikpenjualan.html">📈 Grafik</a>
+      <a href="profilperusahaan.html">🏢 Profil Perusahaan</a>
+      <a href="game.html">🎮 Game</a>
+    </div>
+    <div class="logout" onclick="logout()">Keluar</div>
+  </div>
+
+  <div class="main">
+    <div class="navbar">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+      <div class="navbar-title">Profil & Portofolio Investor</div>
+    </div>
+
+    <div class="profile-header">
+      <h1 id="profile-name"></h1>
+    </div>
+
+    <div class="info-list" id="info-list">
+      <div>Email: <span id="profile-email"></span></div>
+      <div>Nomor HP: <span id="profile-hp"></span></div>
+      <div>No. Rekening: <span id="profile-rek"></span></div>
+      <div>Jumlah Investasi: <span id="profile-investasi"></span></div>
+      <div>Persentase Investasi: <span id="profile-persentase"></span></div>
+      <div>Password: <span id="profile-password"></span></div>
+    </div>
+
+    <div class="profile-card" id="profile-card">
+      <span>Return: <strong id="profile-return"></strong></span>
+      <span>Persen: <strong id="profile-persen"></strong></span>
+    </div>
+
+    <div class="monthly-returns" id="monthly-returns">
+      <h2>Riwayat Return Bulanan</h2>
+    </div>
+
+    <div class="footer">© 2025 <span>Famili Water</span></div>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    function toggleSidebar(){
+      sidebar.classList.toggle("show");
+      overlay.classList.toggle("show");
+    }
+
+    function closeSidebar(){
+      sidebar.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+
+    function logout(){
+      localStorage.removeItem("investorData");
+      window.location.href="login.html";
+    }
+
+    // Load investor data
+    const investor = JSON.parse(localStorage.getItem("investorData"));
+    if(!investor) window.location.href="login.html";
+
+    document.getElementById("profile-name").textContent = investor.Nama;
+    document.getElementById("profile-email").textContent = investor.Email;
+    document.getElementById("profile-hp").textContent = investor["Nomor HP"];
+    document.getElementById("profile-rek").textContent = investor["No. Rekening"];
+    document.getElementById("profile-investasi").textContent = investor["Jumlah Investasi"];
+    document.getElementById("profile-persentase").textContent = investor.Persentase;
+    document.getElementById("profile-password").textContent = investor.Password;
+    document.getElementById("profile-return").textContent = investor.Return;
+    document.getElementById("profile-persen").textContent = investor.Persen;
+
+    // Load monthly returns
+    const bulanList = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    const monthlyContainer = document.getElementById("monthly-returns");
+    bulanList.forEach(bulan=>{
+      if(investor[bulan] && investor[bulan].trim()!==""){
+        const div = document.createElement("div");
+        div.classList.add("month-item");
+        div.innerHTML = `<span>${bulan}</span><span>${investor[bulan]}</span>`;
+        monthlyContainer.appendChild(div);
+      }
+    });
+
+    // Animasi muncul elemen
+    window.addEventListener('load', ()=>{
+      document.getElementById("info-list").classList.add("show");
+      document.getElementById("profile-card").classList.add("show");
+      document.getElementById("monthly-returns").classList.add("show");
+    });
+  </script>
+  <style>
+/* ===== UNIVERSAL PAGE TRANSITIONS ===== */
+:root {
+  --trans-speed: 0.5s; /* durasi transisi */
+}
+
+/* COMBO: Fade + Slide + Zoom */
+.combo {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: opacity var(--trans-speed) ease, transform var(--trans-speed) ease;
+}
+.combo.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* SLIDE HORIZONTAL: dari kiri/kanan */
+.slide-horizontal {
+  transform: translateX(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-horizontal.show {
+  transform: translateX(0);
+}
+
+/* SLIDE VERTICAL: dari atas/bawah */
+.slide-vertical {
+  transform: translateY(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-vertical.show {
+  transform: translateY(0);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const body = document.body;
+
+  // Pilih transisi: "combo", "slide-horizontal", "slide-vertical"
+  const transitionType = "combo"; // ganti sesuai kebutuhan
+
+  body.classList.add(transitionType);
+  setTimeout(() => body.classList.add("show"), 50);
+
+  // Efek keluar saat klik link antar halaman
+  document.querySelectorAll("a").forEach(link => {
+    const href = link.getAttribute("href");
+    if (href && !href.startsWith("#")) {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        body.classList.remove("show");
+        setTimeout(() => { window.location.href = href; }, 500); // sesuai durasi transisi
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>

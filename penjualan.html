@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Penjualan | Famili Water</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#066b77">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #0a0f24 0%, #020409 100%);
+    color: #e0faff;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 230px;
+    background: rgba(10,15,35,0.9);
+    border-right: 1px solid rgba(0,255,255,0.2);
+    box-shadow: 2px 0 15px rgba(0,255,255,0.1);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transition: transform 0.4s ease;
+    z-index: 100;
+  }
+
+  .sidebar.hidden { transform: translateX(-100%); }
+
+  /* Logo bulat */
+  .sidebar .logo-container {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .sidebar .logo-container img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0,255,255,0.4);
+    border: 2px solid rgba(0,255,255,0.4);
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00eaff;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 10px #00ffff90;
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 10px 15px;
+    margin: 6px 0;
+    color: #bcefff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+
+  .sidebar a:hover, .sidebar a.active {
+    background: linear-gradient(90deg,#00bcd4,#673ab7);
+    color: #fff;
+    box-shadow: 0 0 10px #00ffff60;
+  }
+
+  .logout {
+    background: rgba(255,80,80,0.1);
+    color: #ff8080;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .logout:hover { background: rgba(255,80,80,0.2); }
+
+  /* Overlay */
+  .overlay {
+    position: fixed; top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index:50; display:none;
+  }
+  .overlay.show { display:block; }
+
+  /* Main content */
+  .main { flex:1; padding:20px 30px; margin-left:230px; width:100%; }
+  .sidebar.hidden ~ .main { margin-left:0; }
+
+  /* Navbar sticky */
+  .navbar {
+    display:flex; align-items:center;
+    background: rgba(0,234,255,0.1);
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:20px; font-weight:600;
+    color:#00eaff;
+    box-shadow:0 0 10px #00ffff50;
+    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 90;
+  }
+
+  .navbar .toggle-btn {
+    margin-right:15px;
+    background: rgba(0,234,255,0.2);
+    border:1px solid rgba(0,255,255,0.3);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.3s;
+  }
+
+  .navbar .toggle-btn:hover { background: rgba(0,234,255,0.35); }
+
+  .navbar-title { flex:1; text-align:center; }
+
+  /* Card */
+  .card {
+    background: rgba(15,20,40,0.8);
+    border:1px solid rgba(0,255,255,0.15);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 0 15px rgba(0,255,255,0.1);
+    backdrop-filter:blur(10px);
+  }
+
+  .card h3 { color:#00eaff; margin-bottom:15px; }
+
+  /* Table */
+  .table-wrapper { overflow-x:auto; }
+  table { width:100%; border-collapse: collapse; margin-bottom:30px; font-size:14px; }
+  th, td { padding:8px 6px; text-align:center; border-bottom:1px solid rgba(0,255,255,0.2); }
+  th { background: rgba(0,234,255,0.1); color:#00eaff; font-size:14px; }
+  td { color:#bcefff; font-size:13px; }
+  tr.total-row { font-weight:bold; color:#00ff00; }
+
+  .footer { text-align:center; font-size:12px; color:#6ee7ff; opacity:0.6; margin-top:30px; }
+
+  /* Animasi slide-up fade-in */
+  .animated-slide {
+    transform: translateY(40px);
+    opacity:0;
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+  }
+  .animated-slide.show {
+    transform: translateY(0);
+    opacity:1;
+  }
+
+  @media(max-width:768px){
+    .main{margin-left:0; padding:15px;}
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.show{transform:translateX(0);}
+    .navbar-title{ text-align:left; flex:1; }
+    table { font-size:12px; }
+    th, td { padding:6px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div>
+    <div class="logo-container">
+      <img src="https://i.ibb.co.com/JFsMs41R/Logo-FW.png" alt="Logo Famili Water">
+    </div>
+    <div class="logo">Famili Water</div>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="profil.html">👤 Portofolio</a>
+    <a href="#" class="active">📊 Data Penjualan</a>
+    <a href="grafikpenjualan.html">📈 Grafik</a>
+    <a href="profilperusahaan.html">🏢 Profil Perusahaan</a>
+    <a href="game.html">🎮 Game</a>
+  </div>
+  <div class="logout" onclick="logout()">Keluar</div>
+</div>
+
+<div class="main" id="main-content">
+  <div class="navbar animated-slide">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div class="navbar-title">Data Penjualan</div>
+  </div>
+
+  <div class="card animated-slide">
+    <h3>Data Penjualan Harian</h3>
+    <div class="table-wrapper">
+      <table id="daily-table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Closing</th>
+            <th>Pengeluaran</th>
+            <th>Omset</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card animated-slide">
+    <h3>Data Penjualan Bulanan</h3>
+    <div class="table-wrapper">
+      <table id="monthly-table">
+        <thead>
+          <tr>
+            <th>Bulan</th>
+            <th>Closing</th>
+            <th>Pengeluaran</th>
+            <th>Omset</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer animated-slide">© 2025 <span>Famili Water</span></div>
+</div>
+
+<script>
+const sheetDaily = "https://opensheet.elk.sh/1S193igi2hZMiOybbQ7mcE_TNFnpR6j57exS9alhfzMY/Data Penjualan Harian";
+const sheetMonthly = "https://opensheet.elk.sh/1S193igi2hZMiOybbQ7mcE_TNFnpR6j57exS9alhfzMY/Data Penjualan Bulanan";
+
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+
+function toggleSidebar() { sidebar.classList.toggle("show"); overlay.classList.toggle("show"); }
+function closeSidebar() { sidebar.classList.remove("show"); overlay.classList.remove("show"); }
+function logout() { localStorage.removeItem("investorData"); window.location.href="login.html"; }
+
+async function loadData() {
+  try {
+    const formatRp = val => {
+      let num = parseFloat(val.replace(/[^0-9,-]/g,'').replace(',','.')) || 0;
+      return num;
+    };
+    const formatRpString = val => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
+
+    // Harian
+    const resDaily = await fetch(sheetDaily);
+    const daily = await resDaily.json();
+    const dailyBody = document.querySelector("#daily-table tbody");
+    let totalDaily = { Closing:0, Pengeluaran:0, Omset:0 };
+    daily.forEach(row => {
+      totalDaily.Closing += parseFloat(row.Closing) || 0;
+      totalDaily.Pengeluaran += formatRp(row.Pengeluaran);
+      totalDaily.Omset += formatRp(row.Omset);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${row.Tanggal}</td><td>${row.Closing}</td><td>${row.Pengeluaran}</td><td>${row.Omset}</td>`;
+      dailyBody.appendChild(tr);
+    });
+    const trDailyTotal = document.createElement("tr");
+    trDailyTotal.classList.add("total-row");
+    trDailyTotal.innerHTML = `<td>Total</td><td>${totalDaily.Closing}</td><td>${formatRpString(totalDaily.Pengeluaran)}</td><td>${formatRpString(totalDaily.Omset)}</td>`;
+    dailyBody.appendChild(trDailyTotal);
+
+    // Bulanan
+    const resMonthly = await fetch(sheetMonthly);
+    const monthly = await resMonthly.json();
+    const monthlyBody = document.querySelector("#monthly-table tbody");
+    let totalMonthly = { Closing:0, Pengeluaran:0, Omset:0 };
+    monthly.forEach(row => {
+      totalMonthly.Closing += parseFloat(row.Closing) || 0;
+      totalMonthly.Pengeluaran += formatRp(row.Pengeluaran);
+      totalMonthly.Omset += formatRp(row.Omset);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${row.Bulan}</td><td>${row.Closing}</td><td>${row.Pengeluaran}</td><td>${row.Omset}</td>`;
+      monthlyBody.appendChild(tr);
+    });
+    const trMonthlyTotal = document.createElement("tr");
+    trMonthlyTotal.classList.add("total-row");
+    trMonthlyTotal.innerHTML = `<td>Total</td><td>${totalMonthly.Closing}</td><td>${formatRpString(totalMonthly.Pengeluaran)}</td><td>${formatRpString(totalMonthly.Omset)}</td>`;
+    monthlyBody.appendChild(trMonthlyTotal);
+
+  } catch(err) {
+    console.error(err);
+    alert("Gagal mengambil data penjualan!");
+  }
+}
+
+loadData();
+
+window.addEventListener('load', ()=>{
+  const animatedEls = document.querySelectorAll('.animated-slide');
+  animatedEls.forEach((el,i)=>{
+    setTimeout(()=>{ el.classList.add('show'); }, i*200);
+  });
+});
+</script>
+<style>
+/* ===== UNIVERSAL PAGE TRANSITIONS ===== */
+:root {
+  --trans-speed: 0.5s; /* durasi transisi */
+}
+
+/* COMBO: Fade + Slide + Zoom */
+.combo {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: opacity var(--trans-speed) ease, transform var(--trans-speed) ease;
+}
+.combo.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* SLIDE HORIZONTAL: dari kiri/kanan */
+.slide-horizontal {
+  transform: translateX(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-horizontal.show {
+  transform: translateX(0);
+}
+
+/* SLIDE VERTICAL: dari atas/bawah */
+.slide-vertical {
+  transform: translateY(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-vertical.show {
+  transform: translateY(0);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const body = document.body;
+
+  // Pilih transisi: "combo", "slide-horizontal", "slide-vertical"
+  const transitionType = "combo"; // ganti sesuai kebutuhan
+
+  body.classList.add(transitionType);
+  setTimeout(() => body.classList.add("show"), 50);
+
+  // Efek keluar saat klik link antar halaman
+  document.querySelectorAll("a").forEach(link => {
+    const href = link.getAttribute("href");
+    if (href && !href.startsWith("#")) {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        body.classList.remove("show");
+        setTimeout(() => { window.location.href = href; }, 500); // sesuai durasi transisi
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>

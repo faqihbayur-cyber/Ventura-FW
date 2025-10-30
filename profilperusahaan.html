@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Profil Perusahaan | Famili Water</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#066b77">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+  * { box-sizing: border-box; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #0a0f24 0%, #020409 100%);
+    color: #e0faff;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 230px;
+    background: rgba(10,15,35,0.9);
+    border-right: 1px solid rgba(0,255,255,0.2);
+    box-shadow: 2px 0 15px rgba(0,255,255,0.1);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100%;
+    transition: transform 0.36s ease;
+    z-index: 100;
+  }
+  .sidebar.hidden { transform: translateX(-100%); }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .logo-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #00eaff;
+    box-shadow: 0 0 15px rgba(0,255,255,0.6);
+    margin-bottom: 10px;
+    animation: spinOnce 1.2s ease-in-out;
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00eaff;
+    text-shadow: 0 0 10px #00ffff90;
+  }
+  @keyframes spinOnce {
+    from { transform: rotate(0deg); opacity: 0; }
+    to { transform: rotate(360deg); opacity: 1; }
+  }
+
+  .sidebar a {
+    display:block; padding:10px 15px; margin:6px 0;
+    color:#bcefff; text-decoration:none; border-radius:8px; font-weight:500; transition:0.18s;
+  }
+  .sidebar a:hover, .sidebar a.active {
+    background: linear-gradient(90deg,#00bcd4,#673ab7); color:#fff; box-shadow:0 0 10px #00ffff60;
+  }
+
+  .logout {
+    background: rgba(255,80,80,0.1);
+    color:#ff8080;
+    text-align:center;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+
+  .overlay {
+    position: fixed; inset:0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    display:none;
+  }
+  .overlay.show { display:block; }
+
+  /* Main */
+  .main {
+    flex:1;
+    padding:30px;
+    margin-left:230px;
+    transition: margin-left 0.36s ease;
+    width:100%;
+  }
+  .sidebar.hidden ~ .main { margin-left:0; }
+
+  .navbar {
+    display:flex; align-items:center; gap:12px;
+    background: rgba(0,234,255,0.08);
+    padding:12px 18px; border-radius:12px; margin-bottom:24px;
+    font-size:18px; font-weight:600; color:#00eaff;
+    box-shadow:0 0 10px #00ffff50; backdrop-filter: blur(8px);
+    position: sticky; top: 12px; z-index: 40;
+  }
+
+  .toggle-btn {
+    background: rgba(0,234,255,0.12);
+    border:1px solid rgba(0,255,255,0.2);
+    color:#00eaff;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .toggle-btn:hover { background: rgba(0,234,255,0.24); }
+  .navbar-title { flex:1; text-align:center; }
+
+  /* ==== GALERI FOTO (bukan slideshow) ==== */
+  .gallery-container {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 10px;
+    scroll-snap-type: x mandatory;
+    border-radius: 16px;
+    background: rgba(15,25,45,0.85);
+    box-shadow: 0 0 25px rgba(0,255,255,0.15);
+    margin-bottom: 28px;
+  }
+  .gallery-container::-webkit-scrollbar {
+    height: 8px;
+  }
+  .gallery-container::-webkit-scrollbar-thumb {
+    background: rgba(0,255,255,0.4);
+    border-radius: 4px;
+  }
+
+  .gallery-item {
+    flex: 0 0 auto;
+    width: 280px;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+  .gallery-item:hover {
+    box-shadow: 0 0 18px rgba(0,255,255,0.3);
+  }
+
+  /* Konten */
+  section {
+    margin-bottom:32px;
+    background: rgba(15,20,40,0.85);
+    border:1px solid rgba(0,255,255,0.12);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+  }
+  section h2 {
+    color:#00eaff;
+    margin:0 0 10px 0;
+  }
+  section p, section li {
+    color:#d9faff;
+    line-height:1.7;
+  }
+
+  .social-icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #e0faff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .social-icons img {
+    width: 20px;
+    height: 20px;
+    filter: drop-shadow(0 0 3px #00ffff90);
+  }
+  .social-icons a:hover {
+    color: #00eaff;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+  }
+
+  .footer {
+    text-align:center;
+    font-size:12px;
+    color:#6ee7ff;
+    opacity:0.6;
+    margin-top:18px;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 700ms ease, transform 700ms ease;
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media(max-width:720px){
+    .main { padding:18px; margin-left:0; }
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.show { transform: translateX(0); }
+    .navbar-title { text-align:left; }
+    .gallery-item { width: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div>
+    <div class="logo">
+      <img src="https://i.ibb.co.com/JFsMs41R/Logo-FW.png" alt="Logo Famili Water" class="logo-img">
+      <div class="logo-text">Famili Water</div>
+    </div>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="profil.html">👤 Portofolio</a>
+    <a href="penjualan.html">📊 Data Penjualan</a>
+    <a href="grafikpenjualan.html">📈 Grafik</a>
+    <a href="profilperusahaan.html" class="active">🏢 Profil Perusahaan</a>
+    <a href="game.html">🎮 Game</a>
+  </div>
+  <div class="logout" onclick="logout()">Keluar</div>
+</aside>
+
+<main class="main">
+  <div class="navbar reveal">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div class="navbar-title">Profil Perusahaan</div>
+  </div>
+
+  <!-- ==== GALERI FOTO ==== -->
+  <div class="gallery-container reveal">
+    <div class="gallery-item"><img src="https://i.ibb.co/JFsMs41R/Logo-FW.png" alt="Foto 1"></div>
+    <div class="gallery-item"><img src="https://i.ibb.co/C3y0PYqF/Picsart-25-10-05-18-18-42-669.jpg" alt="Foto 2"></div>
+    <div class="gallery-item"><img src="https://i.ibb.co.com/ccjvvbHT/20251026-120116-0000.png" alt="Foto 3"></div>
+  </div>
+
+  <!-- ==== KONTEN ==== -->
+  <section class="reveal">
+    <h2>Profil Perusahaan</h2>
+    <p><strong>Famili Water – Air Godogan</strong> adalah perusahaan air matang isi ulang yang mengutamakan kesegaran dan kealamian kualitas air Nusantara. Kami berkomitmen menghadirkan air minum terbaik untuk keluarga dengan proses pematangan profesional dan higienis.</p>
+    <p><strong>Visi:</strong> Membantu Mewujudkan Kesejahteraan Bersama</p>
+  </section>
+
+  <section class="reveal">
+    <h2>Sejarah & Latar Belakang</h2>
+    <p>Pada tahun 2022, banyak warga mengeluhkan rasa dan konsistensi air isi ulang yang hanya melalui proses filter tanpa pematangan yang memadai — menyebabkan rasa tidak nyaman setelah konsumsi dan daya simpan yang buruk.</p>
+    <p>Melihat keresahan tersebut, <strong>Ust. Ita Mustopa</strong> mencari solusi. Dari penelitian dan pengujian, beliau memperkenalkan metode “air godogan”: air yang direbus secara profesional dan dikemas higienis. Dari sana lahir Famili Water pada tahun 2022, dengan tujuan menyediakan air matang siap minum berkualitas untuk keluarga.</p>
+  </section>
+
+  <section class="reveal">
+    <h2>Filosofi & Nilai-Nilai</h2>
+    <ul>
+      <li><strong>Kejujuran</strong> — kualitas air yang jujur tanpa pengurangan.</li>
+      <li><strong>Kebersihan</strong> — standar higienis pada semua tahap produksi.</li>
+      <li><strong>Kepedulian</strong> — solusi praktis untuk keluarga sibuk agar tetap sehat.</li>
+    </ul>
+  </section>
+
+  <section class="reveal">
+    <h2>Kontak & Media Sosial</h2>
+    <p>📍 Jl. Langgenjati, Kampung Paris, Desa Bayur Lor, Kec. Cilamaya Kulon, Kab. Karawang</p>
+    <p>📧 faqihbayur@gmail.com</p>
+    <p>📞 0857-5999-5235</p>
+    <div class="social-icons">
+      <a href="https://instagram.com/familiwater" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"> @familiwater
+      </a>
+      <a href="https://facebook.com/familiwa" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"> Famili Water
+      </a>
+    </div>
+  </section>
+
+  <div class="footer">© 2025 <span>Famili Water</span></div>
+</main>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function toggleSidebar(){
+  sidebar.classList.toggle('show');
+  sidebar.classList.toggle('hidden', !sidebar.classList.contains('show'));
+  overlay.classList.toggle('show');
+}
+function closeSidebar(){
+  sidebar.classList.remove('show');
+  sidebar.classList.add('hidden');
+  overlay.classList.remove('show');
+}
+function logout(){
+  localStorage.removeItem('investorData');
+  window.location.href = 'login.html';
+}
+
+// === Reveal animation ===
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries, observer)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      observer.unobserve(entry.target);
+    }
+  });
+},{ threshold: 0.18 });
+reveals.forEach(el=>obs.observe(el));
+
+if(window.innerWidth <= 720){
+  sidebar.classList.add('hidden');
+}
+</script>
+<style>
+/* ===== UNIVERSAL PAGE TRANSITIONS ===== */
+:root {
+  --trans-speed: 0.5s; /* durasi transisi */
+}
+
+/* COMBO: Fade + Slide + Zoom */
+.combo {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: opacity var(--trans-speed) ease, transform var(--trans-speed) ease;
+}
+.combo.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* SLIDE HORIZONTAL: dari kiri/kanan */
+.slide-horizontal {
+  transform: translateX(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-horizontal.show {
+  transform: translateX(0);
+}
+
+/* SLIDE VERTICAL: dari atas/bawah */
+.slide-vertical {
+  transform: translateY(100%);
+  transition: transform var(--trans-speed) ease;
+}
+.slide-vertical.show {
+  transform: translateY(0);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const body = document.body;
+
+  // Pilih transisi: "combo", "slide-horizontal", "slide-vertical"
+  const transitionType = "combo"; // ganti sesuai kebutuhan
+
+  body.classList.add(transitionType);
+  setTimeout(() => body.classList.add("show"), 50);
+
+  // Efek keluar saat klik link antar halaman
+  document.querySelectorAll("a").forEach(link => {
+    const href = link.getAttribute("href");
+    if (href && !href.startsWith("#")) {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        body.classList.remove("show");
+        setTimeout(() => { window.location.href = href; }, 500); // sesuai durasi transisi
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>

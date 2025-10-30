@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Investor | Famili Water</title>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#066b77">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/icon-192.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #0a0f24 0%, #020409 100%);
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.05) 10%, transparent 10%) repeat;
+      background-size: 60px 60px;
+      animation: move 20s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes move {
+      from { transform: translate(0,0); }
+      to { transform: translate(-60px,-60px); }
+    }
+
+    @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px);} 100% { opacity: 1; transform: translateY(0);} }
+    @keyframes spinLogo { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .login-box {
+      position: relative;
+      z-index: 1;
+      background: rgba(15,20,40,0.85);
+      padding: 35px 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,255,255,0.2);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .login-box img.logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      object-fit: cover;
+      border: 2px solid #00eaff50;
+      box-shadow: 0 0 10px #00ffff50;
+      animation: spinLogo 2s ease forwards;
+    }
+
+    .login-box h2 {
+      color: #aafaff;
+      font-size: 22px;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px #00ffff70;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.5s;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #e0faff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    input:nth-of-type(1) { animation-delay: 0.7s; }
+    input:nth-of-type(2) { animation-delay: 0.9s; }
+
+    input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 10px #00ffff70; }
+
+    button {
+      background: linear-gradient(90deg,#00bcd4,#673ab7);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 15px;
+      transition: 0.3s;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 1.1s;
+    }
+
+    button:hover { opacity: 0.85; transform: scale(1.05); }
+
+    .error {
+      color: #ff5c5c;
+      margin-top: 15px;
+      font-size: 14px;
+      text-shadow: 0 0 5px #ff5c5c50;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #6ee7ff;
+      opacity: 0.6;
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 1.3s;
+    }
+
+    .footer span { color: #a47aff; }
+
+    @media(max-width:480px){
+      .login-box { padding: 25px 20px; }
+      .login-box h2 { font-size: 20px; }
+      input { padding: 10px; font-size: 13px; }
+      button { padding: 10px; font-size: 14px; }
+      img.logo { width: 80px; height: 80px; margin-bottom: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <img src="https://i.ibb.co/JFsMs41R/Logo-FW.png" alt="Logo FW" class="logo">
+    <h2>Login Investor</h2>
+    <input type="text" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <p class="error" id="error-msg"></p>
+    <div class="footer">© 2025 <span>Famili Water</span></div>
+  </div>
+
+  <script>
+  const sheetURL = "https://opensheet.elk.sh/1S193igi2hZMiOybbQ7mcE_TNFnpR6j57exS9alhfzMY/Akun";
+
+  async function login() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorMsg = document.getElementById("error-msg");
+    errorMsg.textContent = "";
+
+    if (!email || !password) {
+      errorMsg.textContent = "Isi email dan password terlebih dahulu.";
+      return;
+    }
+
+    try {
+      const response = await fetch(sheetURL);
+      const data = await response.json();
+
+      const investor = data.find(row => 
+        row.Email?.trim().toLowerCase() === email.toLowerCase() &&
+        row.Password?.trim() === password
+      );
+
+      if (investor) {
+        localStorage.setItem("investorData", JSON.stringify(investor));
+
+        // Redirect ke dashboard langsung tanpa alert
+        window.location.href = "dashboard.html";
+      } else {
+        errorMsg.textContent = "Email atau password salah!";
+      }
+    } catch (err) {
+      console.error(err);
+      errorMsg.textContent = "Gagal menghubungkan ke server.";
+    }
+  }
+  </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(reg => console.log('Service Worker terdaftar:', reg.scope))
+    .catch(err => console.warn('Pendaftaran Service Worker gagal:', err));
+}
+</script>
+
+</body>
+</html>
